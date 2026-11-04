@@ -22,10 +22,19 @@ clickButton.id = "main-action";
 clickButton.type = "button";
 clickButton.textContent = "Click me";
 
-let clickCount = 0;
+const sporeCount = document.createElement("p");
+sporeCount.id = "spore-count";
+
+let spores = 0;
+
+function renderSpores(): void {
+  sporeCount.textContent = `Spores: ${spores}`;
+}
+
 clickButton.addEventListener("click", () => {
-  clickCount += 1;
-  console.log(`main action fired ${clickCount} time(s)`);
+  spores += 1;
+  renderSpores();
 });
 
-app.append(heading, image, clickButton);
+renderSpores();
+app.append(heading, image, sporeCount, clickButton);
