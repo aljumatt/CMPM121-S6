@@ -2,36 +2,21 @@
 // even this tiny example demonstrates a separately deployed asset.
 // @deno-types="./asset-url.d.ts"
 import mushroomUrl from "./assets/mushroom.svg?no-inline";
+import {
+  buy,
+  costOf,
+  createGameState,
+  grow,
+  ownedOf,
+  sporesPerSecond,
+  sporesPerTap,
+  tap,
+} from "./game/state.ts";
+import { type UpgradeDef, UPGRADES } from "./game/upgrades.ts";
 
 const app = document.querySelector<HTMLElement>("#app")!;
 
-const SPORES_PER_SECOND = 1;
-const COMPOST_BIN_COST = 10;
-const COMPOST_BIN_RATE_BONUS = 1;
-const SPORE_SIEVE_COST = 15;
-const SPORE_SIEVE_TAP_BONUS = 1;
-const DEW_COLLECTOR_COST = 30;
-const DEW_COLLECTOR_RATE_BONUS = 3;
-const COST_GROWTH = 1.15;
-
-let spores = 0;
-let compostBins = 0;
-let sporeSieves = 0;
-let dewCollectors = 0;
-
-function costOf(baseCost: number, growth: number, owned: number): number {
-  return Math.ceil(baseCost * growth ** owned);
-}
-
-function sporesPerSecond(): number {
-  return SPORES_PER_SECOND +
-    compostBins * COMPOST_BIN_RATE_BONUS +
-    dewCollectors * DEW_COLLECTOR_RATE_BONUS;
-}
-
-function sporesPerTap(): number {
-  return 1 + sporeSieves * SPORE_SIEVE_TAP_BONUS;
-}
+const state = createGameState();
 
 const heading = document.createElement("h1");
 heading.textContent = "Mushroom Garden";
@@ -64,101 +49,62 @@ tapRate.id = "spore-tap-rate";
 const shop = document.createElement("div");
 shop.id = "shop";
 
-const compostItem = document.createElement("div");
-compostItem.className = "shop-item";
-const compostButton = document.createElement("button");
-compostButton.id = "buy-compost-bin";
-compostButton.type = "button";
-const compostOwned = document.createElement("p");
-compostOwned.className = "owned";
-compostOwned.id = "owned-compost-bin";
-const compostDescription = document.createElement("p");
-compostDescription.className = "description";
-compostDescription.textContent = "Rotted leaves feed the mycelium below.";
-compostItem.append(compostButton, compostOwned, compostDescription);
+interface UpgradeView {
+  def: UpgradeDef;
+  button: HTMLButtonElement;
+  ownedLine: HTMLParagraphElement;
+}
 
-const sieveItem = document.createElement("div");
-sieveItem.className = "shop-item";
-const sieveButton = document.createElement("button");
-sieveButton.id = "buy-spore-sieve";
-sieveButton.type = "button";
-const sieveOwned = document.createElement("p");
-sieveOwned.className = "owned";
-sieveOwned.id = "owned-spore-sieve";
-const sieveDescription = document.createElement("p");
-sieveDescription.className = "description";
-sieveDescription.textContent = "Shakes loose extra spores with every tap.";
-sieveItem.append(sieveButton, sieveOwned, sieveDescription);
+function effectSummary(def: UpgradeDef): string {
+  switch (def.effect.kind) {
+    case "rate":
+      return `+${def.effect.bonusPerSecond}/s each`;
+    case "tap":
+      return `+${def.effect.bonusPerTap}/tap each`;
+  }
+}
 
-const dewItem = document.createElement("div");
-dewItem.className = "shop-item";
-const dewButton = document.createElement("button");
-dewButton.id = "buy-dew-collector";
-dewButton.type = "button";
-const dewOwned = document.createElement("p");
-dewOwned.className = "owned";
-dewOwned.id = "owned-dew-collector";
-const dewDescription = document.createElement("p");
-dewDescription.className = "description";
-dewDescription.textContent = "Condenses morning mist into a steady drip.";
-dewItem.append(dewButton, dewOwned, dewDescription);
+const upgradeViews: UpgradeView[] = UPGRADES.map((def) => {
+  const item = document.createElement("div");
+  item.className = "shop-item";
+
+  const button = document.createElement("button");
+  button.id = `buy-${def.id}`;
+  button.type = "button";
+  button.addEventListener("click", () => {
+    buy(state, def);
+    render();
+  });
+
+  const ownedLine = document.createElement("p");
+  ownedLine.className = "owned";
+
+  const description = document.createElement("p");
+  description.className = "description";
+  description.textContent = def.description;
+
+  item.append(button, ownedLine, description);
+  shop.append(item);
+  return { def, button, ownedLine };
+});
 
 function render(): void {
-  const compostCost = costOf(COMPOST_BIN_COST, COST_GROWTH, compostBins);
-  const sieveCost = costOf(SPORE_SIEVE_COST, COST_GROWTH, sporeSieves);
-  const dewCost = costOf(DEW_COLLECTOR_COST, COST_GROWTH, dewCollectors);
+  sporeCount.textContent = `Spores: ${Math.floor(state.spores)}`;
+  sporeRate.textContent = `Spores per second: ${sporesPerSecond(state)}`;
+  tapRate.textContent = `Spores per tap: ${sporesPerTap(state)}`;
 
-  sporeCount.textContent = `Spores: ${Math.floor(spores)}`;
-  sporeRate.textContent = `Spores per second: ${sporesPerSecond()}`;
-  tapRate.textContent = `Spores per tap: ${sporesPerTap()}`;
-
-  compostButton.textContent = `Buy compost bin (${compostCost} spores)`;
-  compostButton.disabled = spores < compostCost;
-  sieveButton.textContent = `Buy spore sieve (${sieveCost} spores)`;
-  sieveButton.disabled = spores < sieveCost;
-  dewButton.textContent = `Buy dew collector (${dewCost} spores)`;
-  dewButton.disabled = spores < dewCost;
-
-  compostOwned.textContent =
-    `Owned: ${compostBins} · +${COMPOST_BIN_RATE_BONUS}/s each`;
-  sieveOwned.textContent =
-    `Owned: ${sporeSieves} · +${SPORE_SIEVE_TAP_BONUS}/tap each`;
-  dewOwned.textContent =
-    `Owned: ${dewCollectors} · +${DEW_COLLECTOR_RATE_BONUS}/s each`;
+  for (const view of upgradeViews) {
+    const cost = costOf(state, view.def);
+    view.button.textContent = `Buy ${view.def.name} (${cost} spores)`;
+    view.button.disabled = state.spores < cost;
+    view.ownedLine.textContent = `Owned: ${ownedOf(state, view.def)} · ${
+      effectSummary(view.def)
+    }`;
+  }
 }
 
 clickButton.addEventListener("click", () => {
-  spores += sporesPerTap();
-  render();
-});
-
-compostButton.addEventListener("click", () => {
-  const cost = costOf(COMPOST_BIN_COST, COST_GROWTH, compostBins);
-  if (spores < cost) {
-    return;
-  }
-  spores -= cost;
-  compostBins += 1;
-  render();
-});
-
-sieveButton.addEventListener("click", () => {
-  const cost = costOf(SPORE_SIEVE_COST, COST_GROWTH, sporeSieves);
-  if (spores < cost) {
-    return;
-  }
-  spores -= cost;
-  sporeSieves += 1;
-  render();
-});
-
-dewButton.addEventListener("click", () => {
-  const cost = costOf(DEW_COLLECTOR_COST, COST_GROWTH, dewCollectors);
-  if (spores < cost) {
-    return;
-  }
-  spores -= cost;
-  dewCollectors += 1;
+  tap(state);
   render();
 });
 
@@ -167,7 +113,7 @@ let lastTime = performance.now();
 function tick(now: number): void {
   const elapsedSeconds = (now - lastTime) / 1000;
   lastTime = now;
-  spores += elapsedSeconds * sporesPerSecond();
+  grow(state, elapsedSeconds);
   render();
   requestAnimationFrame(tick);
 }
@@ -175,5 +121,4 @@ function tick(now: number): void {
 requestAnimationFrame(tick);
 
 render();
-shop.append(compostItem, sieveItem, dewItem);
 app.append(heading, tagline, clickButton, sporeCount, sporeRate, tapRate, shop);
