@@ -1,7 +1,7 @@
 // Vite turns this import into a production-safe URL. Keep it as a file so
 // even this tiny example demonstrates a separately deployed asset.
 // @deno-types="./asset-url.d.ts"
-import tileUrl from "./assets/tile.svg?no-inline";
+import mushroomUrl from "./assets/mushroom.svg?no-inline";
 
 const app = document.querySelector<HTMLElement>("#app")!;
 
@@ -34,13 +34,23 @@ function sporesPerTap(): number {
 }
 
 const heading = document.createElement("h1");
-heading.textContent = "D1 project";
+heading.textContent = "Mushroom Garden";
 
-const image = document.createElement("img");
-image.src = tileUrl;
-image.alt = "A teal tile with a cream circle";
-image.width = 96;
-image.height = 96;
+const tagline = document.createElement("p");
+tagline.className = "tagline";
+tagline.textContent = "Tap the mushroom. Gather spores. Grow the patch.";
+
+const mushroomImage = document.createElement("img");
+mushroomImage.src = mushroomUrl;
+mushroomImage.alt = "A plump mushroom, ready to tap";
+mushroomImage.width = 180;
+mushroomImage.height = 180;
+
+const clickButton = document.createElement("button");
+clickButton.id = "main-action";
+clickButton.type = "button";
+clickButton.setAttribute("aria-label", "Tap the mushroom");
+clickButton.append(mushroomImage);
 
 const sporeCount = document.createElement("p");
 sporeCount.id = "spore-count";
@@ -51,34 +61,47 @@ sporeRate.id = "spore-rate";
 const tapRate = document.createElement("p");
 tapRate.id = "spore-tap-rate";
 
-const clickButton = document.createElement("button");
-clickButton.id = "main-action";
-clickButton.type = "button";
-clickButton.textContent = "Click me";
-
 const shop = document.createElement("div");
 shop.id = "shop";
 
+const compostItem = document.createElement("div");
+compostItem.className = "shop-item";
 const compostButton = document.createElement("button");
 compostButton.id = "buy-compost-bin";
 compostButton.type = "button";
-
 const compostOwned = document.createElement("p");
+compostOwned.className = "owned";
 compostOwned.id = "owned-compost-bin";
+const compostDescription = document.createElement("p");
+compostDescription.className = "description";
+compostDescription.textContent = "Rotted leaves feed the mycelium below.";
+compostItem.append(compostButton, compostOwned, compostDescription);
 
+const sieveItem = document.createElement("div");
+sieveItem.className = "shop-item";
 const sieveButton = document.createElement("button");
 sieveButton.id = "buy-spore-sieve";
 sieveButton.type = "button";
-
 const sieveOwned = document.createElement("p");
+sieveOwned.className = "owned";
 sieveOwned.id = "owned-spore-sieve";
+const sieveDescription = document.createElement("p");
+sieveDescription.className = "description";
+sieveDescription.textContent = "Shakes loose extra spores with every tap.";
+sieveItem.append(sieveButton, sieveOwned, sieveDescription);
 
+const dewItem = document.createElement("div");
+dewItem.className = "shop-item";
 const dewButton = document.createElement("button");
 dewButton.id = "buy-dew-collector";
 dewButton.type = "button";
-
 const dewOwned = document.createElement("p");
+dewOwned.className = "owned";
 dewOwned.id = "owned-dew-collector";
+const dewDescription = document.createElement("p");
+dewDescription.className = "description";
+dewDescription.textContent = "Condenses morning mist into a steady drip.";
+dewItem.append(dewButton, dewOwned, dewDescription);
 
 function render(): void {
   const compostCost = costOf(COMPOST_BIN_COST, COST_GROWTH, compostBins);
@@ -152,12 +175,5 @@ function tick(now: number): void {
 requestAnimationFrame(tick);
 
 render();
-shop.append(
-  compostButton,
-  compostOwned,
-  sieveButton,
-  sieveOwned,
-  dewButton,
-  dewOwned,
-);
-app.append(heading, image, sporeCount, sporeRate, tapRate, clickButton, shop);
+shop.append(compostItem, sieveItem, dewItem);
+app.append(heading, tagline, clickButton, sporeCount, sporeRate, tapRate, shop);

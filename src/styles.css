@@ -1,0 +1,114 @@
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  background: #efe6d4;
+  color: #2f3a2a;
+  font-family: system-ui, sans-serif;
+}
+
+#app {
+  max-width: 480px;
+  padding: 2rem 1rem 3rem;
+  text-align: center;
+}
+
+h1 {
+  font-family: Georgia, serif;
+  font-size: 2rem;
+  margin: 0;
+}
+
+.tagline {
+  font-style: italic;
+  color: #6b7a5e;
+  margin: 0.25rem 0 1rem;
+}
+
+#main-action {
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  transition: transform 80ms ease;
+}
+
+#main-action:hover {
+  transform: scale(1.04);
+}
+
+#main-action:active {
+  transform: scale(0.94);
+}
+
+#main-action:focus-visible {
+  outline: 3px solid #4a7c43;
+  outline-offset: 4px;
+  border-radius: 24px;
+}
+
+#main-action img {
+  display: block;
+  width: 180px;
+  height: 180px;
+}
+
+#spore-count {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin: 0.6rem 0 0;
+}
+
+#spore-rate,
+#spore-tap-rate {
+  color: #6b7a5e;
+  margin: 0.15rem 0 0;
+}
+
+#shop {
+  margin-top: 1.5rem;
+  display: grid;
+  gap: 0.75rem;
+  text-align: left;
+}
+
+.shop-item {
+  background: #fffaf0;
+  border: 1px solid #d8ccae;
+  border-radius: 10px;
+  padding: 0.6rem 0.8rem;
+}
+
+.shop-item button {
+  background: #4a7c43;
+  color: #fdf8ec;
+  border: none;
+  border-radius: 8px;
+  padding: 0.45rem 0.8rem;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.shop-item button:hover:not(:disabled) {
+  background: #3d6a37;
+}
+
+.shop-item button:disabled {
+  background: #a8b09b;
+  cursor: not-allowed;
+  opacity: 0.75;
+}
+
+.owned {
+  margin: 0.4rem 0 0;
+  font-size: 0.9rem;
+  color: #4a5a40;
+}
+
+.description {
+  margin: 0.15rem 0 0;
+  font-size: 0.85rem;
+  font-style: italic;
+  color: #77836b;
+}
