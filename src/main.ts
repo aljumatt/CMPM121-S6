@@ -12,11 +12,16 @@ const SPORE_SIEVE_COST = 15;
 const SPORE_SIEVE_TAP_BONUS = 1;
 const DEW_COLLECTOR_COST = 30;
 const DEW_COLLECTOR_RATE_BONUS = 3;
+const COST_GROWTH = 1.15;
 
 let spores = 0;
 let compostBins = 0;
 let sporeSieves = 0;
 let dewCollectors = 0;
+
+function costOf(baseCost: number, growth: number, owned: number): number {
+  return Math.ceil(baseCost * growth ** owned);
+}
 
 function sporesPerSecond(): number {
   return SPORES_PER_SECOND +
@@ -57,7 +62,6 @@ shop.id = "shop";
 const compostButton = document.createElement("button");
 compostButton.id = "buy-compost-bin";
 compostButton.type = "button";
-compostButton.textContent = `Buy compost bin (${COMPOST_BIN_COST} spores)`;
 
 const compostOwned = document.createElement("p");
 compostOwned.id = "owned-compost-bin";
@@ -65,7 +69,6 @@ compostOwned.id = "owned-compost-bin";
 const sieveButton = document.createElement("button");
 sieveButton.id = "buy-spore-sieve";
 sieveButton.type = "button";
-sieveButton.textContent = `Buy spore sieve (${SPORE_SIEVE_COST} spores)`;
 
 const sieveOwned = document.createElement("p");
 sieveOwned.id = "owned-spore-sieve";
@@ -73,18 +76,26 @@ sieveOwned.id = "owned-spore-sieve";
 const dewButton = document.createElement("button");
 dewButton.id = "buy-dew-collector";
 dewButton.type = "button";
-dewButton.textContent = `Buy dew collector (${DEW_COLLECTOR_COST} spores)`;
 
 const dewOwned = document.createElement("p");
 dewOwned.id = "owned-dew-collector";
 
 function render(): void {
+  const compostCost = costOf(COMPOST_BIN_COST, COST_GROWTH, compostBins);
+  const sieveCost = costOf(SPORE_SIEVE_COST, COST_GROWTH, sporeSieves);
+  const dewCost = costOf(DEW_COLLECTOR_COST, COST_GROWTH, dewCollectors);
+
   sporeCount.textContent = `Spores: ${Math.floor(spores)}`;
   sporeRate.textContent = `Spores per second: ${sporesPerSecond()}`;
   tapRate.textContent = `Spores per tap: ${sporesPerTap()}`;
-  compostButton.disabled = spores < COMPOST_BIN_COST;
-  sieveButton.disabled = spores < SPORE_SIEVE_COST;
-  dewButton.disabled = spores < DEW_COLLECTOR_COST;
+
+  compostButton.textContent = `Buy compost bin (${compostCost} spores)`;
+  compostButton.disabled = spores < compostCost;
+  sieveButton.textContent = `Buy spore sieve (${sieveCost} spores)`;
+  sieveButton.disabled = spores < sieveCost;
+  dewButton.textContent = `Buy dew collector (${dewCost} spores)`;
+  dewButton.disabled = spores < dewCost;
+
   compostOwned.textContent =
     `Owned: ${compostBins} · +${COMPOST_BIN_RATE_BONUS}/s each`;
   sieveOwned.textContent =
@@ -99,28 +110,31 @@ clickButton.addEventListener("click", () => {
 });
 
 compostButton.addEventListener("click", () => {
-  if (spores < COMPOST_BIN_COST) {
+  const cost = costOf(COMPOST_BIN_COST, COST_GROWTH, compostBins);
+  if (spores < cost) {
     return;
   }
-  spores -= COMPOST_BIN_COST;
+  spores -= cost;
   compostBins += 1;
   render();
 });
 
 sieveButton.addEventListener("click", () => {
-  if (spores < SPORE_SIEVE_COST) {
+  const cost = costOf(SPORE_SIEVE_COST, COST_GROWTH, sporeSieves);
+  if (spores < cost) {
     return;
   }
-  spores -= SPORE_SIEVE_COST;
+  spores -= cost;
   sporeSieves += 1;
   render();
 });
 
 dewButton.addEventListener("click", () => {
-  if (spores < DEW_COLLECTOR_COST) {
+  const cost = costOf(DEW_COLLECTOR_COST, COST_GROWTH, dewCollectors);
+  if (spores < cost) {
     return;
   }
-  spores -= DEW_COLLECTOR_COST;
+  spores -= cost;
   dewCollectors += 1;
   render();
 });
