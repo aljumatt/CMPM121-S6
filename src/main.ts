@@ -14,34 +14,42 @@ image.alt = "A teal tile with a cream circle";
 image.width = 96;
 image.height = 96;
 
-const message = document.createElement("p");
-message.textContent = "Your project starts here.";
+const sporeCount = document.createElement("p");
+sporeCount.id = "spore-count";
+
+const sporeRate = document.createElement("p");
+sporeRate.id = "spore-rate";
 
 const clickButton = document.createElement("button");
 clickButton.id = "main-action";
 clickButton.type = "button";
 clickButton.textContent = "Click me";
 
-const sporeCount = document.createElement("p");
-sporeCount.id = "spore-count";
-
 const SPORES_PER_SECOND = 1;
 
 let spores = 0;
 
-function renderSpores(): void {
-  sporeCount.textContent = `Spores: ${spores}`;
+function render(): void {
+  sporeCount.textContent = `Spores: ${Math.floor(spores)}`;
+  sporeRate.textContent = `Spores per second: ${SPORES_PER_SECOND}`;
 }
 
 clickButton.addEventListener("click", () => {
   spores += 1;
-  renderSpores();
+  render();
 });
 
-setInterval(() => {
-  spores += SPORES_PER_SECOND;
-  renderSpores();
-}, 1000);
+let lastTime = performance.now();
 
-renderSpores();
-app.append(heading, image, sporeCount, clickButton);
+function tick(now: number): void {
+  const elapsedSeconds = (now - lastTime) / 1000;
+  lastTime = now;
+  spores += elapsedSeconds * SPORES_PER_SECOND;
+  render();
+  requestAnimationFrame(tick);
+}
+
+requestAnimationFrame(tick);
+
+render();
+app.append(heading, image, sporeCount, sporeRate, clickButton);
