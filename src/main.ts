@@ -25,6 +25,8 @@ clickButton.textContent = "Click me";
 const sporeCount = document.createElement("p");
 sporeCount.id = "spore-count";
 
+const SPORES_PER_SECOND = 1;
+
 let spores = 0;
 
 function renderSpores(): void {
@@ -35,6 +37,11 @@ clickButton.addEventListener("click", () => {
   spores += 1;
   renderSpores();
 });
+
+setInterval(() => {
+  spores += SPORES_PER_SECOND;
+  renderSpores();
+}, 1000);
 
 renderSpores();
 app.append(heading, image, sporeCount, clickButton);
