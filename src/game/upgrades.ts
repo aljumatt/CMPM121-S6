@@ -36,4 +36,13 @@ export const UPGRADES: UpgradeDef[] = [
     costGrowth: 1.15,
     effect: { kind: "rate", bonusPerSecond: 3 },
   },
+  {
+    id: "fog-bellows",
+    name: "fog bellows",
+    description:
+      "Puffs damp fog between the fronds; nothing drinks like a cloud.",
+    baseCost: 60,
+    costGrowth: 1.15,
+    effect: { kind: "rate", bonusPerSecond: 6 },
+  },
 ];
