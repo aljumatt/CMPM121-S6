@@ -17,4 +17,15 @@ image.height = 96;
 const message = document.createElement("p");
 message.textContent = "Your project starts here.";
 
-app.append(heading, image, message);
+const clickButton = document.createElement("button");
+clickButton.id = "main-action";
+clickButton.type = "button";
+clickButton.textContent = "Click me";
+
+let clickCount = 0;
+clickButton.addEventListener("click", () => {
+  clickCount += 1;
+  console.log(`main action fired ${clickCount} time(s)`);
+});
+
+app.append(heading, image, clickButton);
